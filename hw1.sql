@@ -1,4 +1,4 @@
-DROP VIEW IF EXISTS q0, q1i, q1ii, q1iii, q1iv, q2i, q2ii, q2iii, q3i, q3ii, q3iii, q4i, q4ii, q4iii, q4iv, q4v;
+DROP VIEW IF EXISTS q0, q1i, q1ii, q1iii, q1iv, q2i, q2ii, q2iii, q3i, q3ii, q3iii, q4i, q4ii, salary_ranges_2016, bin_count, q4iii, q4iv, q4v;
 
 -- Question 0
 CREATE VIEW q0(era) 
@@ -78,24 +78,60 @@ AS
 ;
 
 -- Question 4ii
+CREATE VIEW salary_ranges_2016(min, max, range, width)
+AS
+  SELECT DISTINCT min, max, CAST(max-min AS int), CAST(max-min AS int) / 10 FROM q4i WHERE yearid='2016';
+;
+
+CREATE VIEW bin_count(count, bin) AS
+   SELECT COUNT(*), FLOOR(CAST((s.salary - sr16.min - 1) AS int) / sr16.width) AS bin
+   FROM salaries s, salary_ranges_2016 sr16
+   WHERE s.yearid='2016'
+   GROUP BY bin
+   ORDER BY bin;
+;
+
 CREATE VIEW q4ii(binid, low, high, count)
 AS
-  SELECT FLOOR(CAST(salary / (SELECT max - min / 10 FROM q4i WHERE yearid='2016'))) AS bin FROM salaries WHERE yearid='2016' GROUP BY bin; 
+  SELECT bc.bin, (sr16.min + (sr16.width * bc.bin)), (sr16.min + (sr16.width * bc.bin) + sr16.width), bc.count 
+  FROM bin_count bc, salary_ranges_2016 sr16;
+;
+
+CREATE VIEW salary_ranges_2016(min, max, range, width) 
+AS 
+  SELECT DISTINCT min, max, CAST(max-min AS int), CAST(max-min AS int) / 10 FROM q4i WHERE yearid='2016';
+;
+
+CREATE VIEW bin_count(count, bin) AS
+   SELECT COUNT(*), FLOOR((sr16.min + (s.salary - sr16.min - 1)) / sr16.width) AS bin
+   FROM salaries s, salary_ranges_2016 sr16 
+   WHERE s.yearid='2016' 
+   GROUP BY bin 
+   ORDER BY bin;
 ;
 
 -- Question 4iii
-CREATE VIEW q4iii(yearid, mindiff, maxdiff, avgdiff)
-AS
+CREATE VIEW q4iii(yearid, mindiff, maxdiff, avgdiff)AS
   SELECT a.yearid, a.min - b.min, a.max - b.max, a.avg - b.avg FROM q4i a, q4i b WHERE b.yearid = a.yearid - 1 ORDER BY a.yearid ASC;
 ;
 
 -- Question 4iv
 CREATE VIEW q4iv(playerid, namefirst, namelast, salary, yearid)
 AS
-  SELECT 1, 1, 1, 1, 1 -- replace this line
+  SELECT p.playerid, p.namefirst, p.namelast, s.salary, s.yearid
+  FROM people p, salaries s WHERE s.playerid = p.playerid AND
+  (s.yearid = '2001' OR s.yearid = '2000') AND
+  s.salary = (SELECT max FROM q4i WHERE q4i.yearid = s.yearid); 
 ;
 -- Question 4v
 CREATE VIEW q4v(team, diffAvg) AS
-  SELECT 1, 1 -- replace this line
+  SELECT a.teamid, MAX(s.salary) - MIN(s.salary)
+  FROM allstarfull a, salaries s
+  WHERE a.teamid = s.teamid
+  AND a.playerid = s.playerid
+  AND a.yearid = s.yearid
+  AND s.yearid = '2016'
+  GROUP BY a.teamid
+  ORDER BY a.teamid;
 ;
 
