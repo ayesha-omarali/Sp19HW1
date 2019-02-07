@@ -3,43 +3,45 @@ DROP VIEW IF EXISTS q0, q1i, q1ii, q1iii, q1iv, q2i, q2ii, q2iii, q3i, q3ii, q3i
 -- Question 0
 CREATE VIEW q0(era) 
 AS
-  SELECT 1 -- replace this line
-;
+  SELECT max(era)
+  FROM pitching;
 
 -- Question 1i
 CREATE VIEW q1i(namefirst, namelast, birthyear)
 AS
-  SELECT 1, 1, 1 -- replace this line
+  SELECT namefirst, namelast, birthyear
+  FROM people
+  WHERE weight > 300;
 ;
 
 -- Question 1ii
 CREATE VIEW q1ii(namefirst, namelast, birthyear)
 AS
-  SELECT 1, 1, 1 -- replace this line
+  select namefirst, namelast, birthyear from people where namefirst like '% %';
 ;
 
 -- Question 1iii
 CREATE VIEW q1iii(birthyear, avgheight, count)
 AS
-  SELECT 1, 1, 1 -- replace this line
+SELECT birthyear, AVG(height), COUNT(*)  FROM people GROUP BY birthyear ORDER BY birthyear ASC;
 ;
 
 -- Question 1iv
 CREATE VIEW q1iv(birthyear, avgheight, count)
 AS
-  SELECT 1, 1, 1 -- replace this line
+  SELECT birthyear, AVG(height) as avgheight, COUNT(*)  FROM people GROUP BY birthyear HAVING AVG(height) > 70 ORDER BY birthyear ASC;
 ;
 
 -- Question 2i
 CREATE VIEW q2i(namefirst, namelast, playerid, yearid)
 AS
-  SELECT 1, 1, 1, 1 -- replace this line
+  SELECT namefirst, namelast, h.playerid, yearid FROM halloffame h, people p WHERE h.playerid = p.playerid AND h.inducted='Y' order by yearid desc;
 ;
 
 -- Question 2ii
 CREATE VIEW q2ii(namefirst, namelast, playerid, schoolid, yearid)
 AS
-  SELECT 1, 1, 1, 1, 1 -- replace this line
+SELECT namefirst, namelast, h.playerid, schoolid, h.yearid from halloffame h, schools, people WHERE h.inducted='Y' ORDER BY h.yearid DESC, schoolid ASC, playerid ASC;
 ;
 
 -- Question 2iii
